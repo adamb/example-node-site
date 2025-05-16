@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = 3000
+const port = require('./disco.json').services.web.port
 // Add new required modules
 const axios = require('axios');
 const archiver = require('archiver');
