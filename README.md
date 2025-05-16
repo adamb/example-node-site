@@ -5,7 +5,7 @@
 ### Create ZIP from Image URLs
 `POST /api/create-zip`
 
-Accepts image URLs and returns a ZIP file containing the images.
+Accepts image URLs and returns a download link for a ZIP file containing the images.
 
 **Request:**
 ```json
@@ -16,22 +16,33 @@ Accepts image URLs and returns a ZIP file containing the images.
 
 **Example using curl:**
 ```bash
+# Create the ZIP and get download URL
 curl -X POST http://localhost:3000/api/create-zip \
   -H "Content-Type: application/json" \
-  -d '{"urls": ["https://httpbin.org/image/jpeg", "https://httpbin.org/image/png"]}' \
-  --output images.zip
+  -d '{"urls": ["https://httpbin.org/image/jpeg", "https://httpbin.org/image/png"]}'
+
+# Then download the ZIP using the returned URL:
+curl -L http://localhost:3000/public/zips/images-1708432200456-abc123.zip --output images.zip
 ```
 
-**Response:**
+**Successful Response:**
 ```json
 {
   "url": "http://localhost:3000/public/zips/images-1708432200456-abc123.zip",
-  "expires": "2024-02-20T15:30:00.000Z"
+  "expires": "2024-02-20T15:30:00.000Z"  // 1 hour from creation
 }
 ```
-- Success: JSON response with download URL and expiration time
-- Filename format: `images-<timestamp>-<random>.zip`
-- Individual files: `image-<timestamp>-<index>.<ext>`
+
+**Key Features:**
+- Files stored for 1 hour (automatic cleanup not implemented yet)
+- Unique filenames prevent collisions
+- Direct download URL for easy integration
+
+**Notes:**
+- ZIP files are stored in `public/zips/`
+- First request may take longer depending on image sizes
+- Monitor `expires` timestamp for URL validity
+- Server disk space should be monitored for production use
 
 **Error Responses:**
 - `400 Bad Request` for invalid input format
