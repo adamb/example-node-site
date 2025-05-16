@@ -23,8 +23,14 @@ curl -X POST http://localhost:3000/api/create-zip \
 ```
 
 **Response:**
-- Success: ZIP file with `Content-Disposition` header attachment
-- Filename format: `images-<timestamp>.zip`
+```json
+{
+  "url": "http://localhost:3000/public/zips/images-1708432200456-abc123.zip",
+  "expires": "2024-02-20T15:30:00.000Z"
+}
+```
+- Success: JSON response with download URL and expiration time
+- Filename format: `images-<timestamp>-<random>.zip`
 - Individual files: `image-<timestamp>-<index>.<ext>`
 
 **Error Responses:**

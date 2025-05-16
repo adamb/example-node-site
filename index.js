@@ -5,9 +5,14 @@ const port = require('./disco.json').services.web.port
 const axios = require('axios');
 const archiver = require('archiver');
 const { body, validationResult } = require('express-validator');
+const fs = require('fs');
+const path = require('path');
 
 // Add JSON body parser middleware
 app.use(express.json());
+
+// Add static file serving for the zips directory
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Disco!')
@@ -29,10 +34,15 @@ app.post(
     try {
       const zip = archiver('zip');
       const timestamp = Date.now();
-      const zipName = `images-${timestamp}.zip`;
+      const randomString = Math.random().toString(36).substring(2, 8);
+      const zipName = `images-${timestamp}-${randomString}.zip`;
+      const zipPath = path.join(__dirname, 'public', 'zips', zipName);
 
-      res.attachment(zipName);
-      zip.pipe(res);
+      // Ensure directory exists
+      fs.mkdirSync(path.dirname(zipPath), { recursive: true });
+
+      const output = fs.createWriteStream(zipPath);
+      zip.pipe(output);
 
       const fetchPromises = req.body.urls.map(async (url, index) => {
         try {
@@ -49,11 +59,25 @@ app.post(
       });
 
       await Promise.all(fetchPromises);
+      
       if (zip.pointer() === 0) {
         return res.status(400).json({ error: 'Could not fetch any images' });
       }
 
-      zip.finalize();
+      await zip.finalize();
+      
+      // Wait for file to be fully written
+      await new Promise((resolve, reject) => {
+        output.on('close', resolve);
+        output.on('error', reject);
+      });
+
+      const zipUrl = `${req.protocol}://${req.get('host')}/public/zips/${zipName}`;
+      res.json({ 
+        url: zipUrl,
+        expires: new Date(Date.now() + 3600000).toISOString() // 1 hour expiration
+      });
+
     } catch (error) {
       console.error('ZIP creation error:', error);
       res.status(500).json({ error: 'Failed to create ZIP file' });
