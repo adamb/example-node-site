@@ -76,11 +76,11 @@ HTML-formatted directory listing showing:
 ZIP Files:
 
 images-1708432200456-abc123.zip
-  Created: 2/20/2024, 3:30:00 PM
+  Age: 0h45m ago
   Size: 8103.32 KB
 
 images-1708433100789-def456.zip
-  Created: 2/20/2024, 3:45:00 PM
+  Age: 0h30m ago
   Size: 9001.45 KB
 ```
 

@@ -98,6 +98,13 @@ function getExtension(url) {
   return format.toLowerCase() === 'jpg' ? 'jpeg' : format;
 }
 
+// Add helper function for formatting age
+function formatAge(ms) {
+  const hours = Math.floor(ms / (1000 * 60 * 60));
+  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+  return `${hours}h${minutes.toString().padStart(2, '0')}m ago`;
+}
+
 // Add directory listing endpoint
 app.get('/ls', (req, res) => {
   const dirPath = path.join(__dirname, 'public', 'zips');
@@ -110,15 +117,16 @@ app.get('/ls', (req, res) => {
     const files = fs.readdirSync(dirPath);
     const fileDetails = files.map(file => {
       const stats = fs.statSync(path.join(dirPath, file));
+      const ageMs = Date.now() - stats.mtimeMs;
       return {
         name: file,
         size: `${(stats.size / 1024).toFixed(2)} KB`,
-        created: stats.birthtime.toLocaleString()
+        age: formatAge(ageMs)
       };
     });
 
     const fileList = fileDetails.length > 0 
-      ? fileDetails.map(f => `${f.name}\n  Created: ${f.created}\n  Size: ${f.size}`).join('\n\n')
+      ? fileDetails.map(f => `${f.name}\n  Age: ${f.age}\n  Size: ${f.size}`).join('\n\n')
       : 'No ZIP files found';
 
     res.send(`<pre>ZIP Files:\n\n${fileList}</pre>`);
