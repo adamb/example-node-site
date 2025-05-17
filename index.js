@@ -9,6 +9,12 @@ const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
 
+// Create zips directory if it doesn't exist
+const zipDir = path.join(__dirname, 'public', 'zips');
+if (!fs.existsSync(zipDir)) {
+  fs.mkdirSync(zipDir, { recursive: true });
+}
+
 // Add JSON body parser middleware
 app.use(express.json());
 
@@ -95,13 +101,22 @@ function getExtension(url) {
 // Add directory listing endpoint
 app.get('/ls', (req, res) => {
   const dirPath = path.join(__dirname, 'public', 'zips');
-  const command = `ls -l "${dirPath}"`;
   
-  require('child_process').exec(command, (error, stdout, stderr) => {
-    if (error) {
-      return res.status(500).send(`Error: ${error.message}<br>${stderr}`);
+  // Create directory if it doesn't exist
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+
+  fs.readdir(dirPath, (err, files) => {
+    if (err) {
+      return res.status(500).send(`Error: ${err.message}`);
     }
-    res.send(`<pre>${stdout}</pre>`);
+    
+    const fileList = files.length > 0 
+      ? files.map(file => `- ${file}`).join('\n') 
+      : 'No ZIP files found';
+      
+    res.send(`<pre>ZIP Files:\n${fileList}</pre>`);
   });
 });
 
@@ -112,10 +127,19 @@ app.listen(port, () => {
   cron.schedule('0 * * * *', () => {
     console.log('Running ZIP cleanup');
     const cleanupPath = path.join(__dirname, 'public', 'zips');
-    const command = `find "${cleanupPath}" -name '*.zip' -mmin +60 -delete`;
-    require('child_process').exec(command, (error, stdout, stderr) => {
-      if (error) console.error('Cleanup error:', error);
-      console.log(`Cleaned up ZIP files: ${stdout}`);
+    
+    fs.readdir(cleanupPath, (err, files) => {
+      if (err) return console.error('Cleanup error:', err);
+      
+      files.forEach(file => {
+        const filePath = path.join(cleanupPath, file);
+        const stat = fs.statSync(filePath);
+        
+        if (Date.now() - stat.mtimeMs > 3600000) { // 1 hour
+          fs.unlinkSync(filePath);
+          console.log(`Deleted: ${file}`);
+        }
+      });
     });
   });
 })
