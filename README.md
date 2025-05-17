@@ -55,4 +55,32 @@ curl -L http://localhost:3000/public/zips/images-1708432200456-abc123.zip --outp
 - JPG files will be saved with .jpeg extension
 - Service acts as proxy - ensure URLs are accessible from your server
 
+### List Generated ZIP Files
+`GET /ls`
+
+Returns a directory listing of generated ZIP files.
+
+**Example:**
+```bash
+curl http://localhost:3000/ls
+```
+
+**Response:**
+HTML-formatted directory listing showing:
+- File sizes
+- Modification times
+- Filenames
+
+**Sample Output:**
+```
+total 16384
+-rw-r--r-- 1 user group 8297856 Feb 20 15:30 images-1708432200456-abc123.zip
+-rw-r--r-- 1 user group 9215488 Feb 20 15:45 images-1708433100789-def456.zip
+```
+
+This provides:
+- Direct visibility into the generated files
+- Verification of automatic cleanup
+- Simple debugging without server access
+
 [See the documentation](https://docs.letsdisco.dev/deployment-guides/node)

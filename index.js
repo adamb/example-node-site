@@ -92,6 +92,19 @@ function getExtension(url) {
   return format.toLowerCase() === 'jpg' ? 'jpeg' : format;
 }
 
+// Add directory listing endpoint
+app.get('/ls', (req, res) => {
+  const dirPath = path.join(__dirname, 'public', 'zips');
+  const command = `ls -l "${dirPath}"`;
+  
+  require('child_process').exec(command, (error, stdout, stderr) => {
+    if (error) {
+      return res.status(500).send(`Error: ${error.message}<br>${stderr}`);
+    }
+    res.send(`<pre>${stdout}</pre>`);
+  });
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
   
