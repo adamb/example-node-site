@@ -34,7 +34,8 @@ curl -L http://localhost:3000/public/zips/images-1708432200456-abc123.zip --outp
 ```
 
 **Key Features:**
-- Files stored for 1 hour (automatic cleanup not implemented yet)
+- Files automatically deleted after 1 hour
+- Built-in cleanup runs hourly
 - Unique filenames prevent collisions
 - Direct download URL for easy integration
 

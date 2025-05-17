@@ -7,6 +7,7 @@ const archiver = require('archiver');
 const { body, validationResult } = require('express-validator');
 const fs = require('fs');
 const path = require('path');
+const cron = require('node-cron');
 
 // Add JSON body parser middleware
 app.use(express.json());
@@ -92,5 +93,16 @@ function getExtension(url) {
 }
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Example app listening on port ${port}`);
+  
+  // Schedule cleanup job
+  cron.schedule('0 * * * *', () => {
+    console.log('Running ZIP cleanup');
+    const cleanupPath = path.join(__dirname, 'public', 'zips');
+    const command = `find "${cleanupPath}" -name '*.zip' -mmin +60 -delete`;
+    require('child_process').exec(command, (error, stdout, stderr) => {
+      if (error) console.error('Cleanup error:', error);
+      console.log(`Cleaned up ZIP files: ${stdout}`);
+    });
+  });
 })

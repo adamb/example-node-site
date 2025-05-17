@@ -3,11 +3,6 @@
     "services": {
         "web": {
             "port": 3000
-        },
-        "zip_cleanup": {
-            "type": "cron",
-            "schedule": "0 * * * *",
-            "command": "find ./public/zips -name '*.zip' -mmin +60 -delete"
         }
     }
 }
