@@ -73,9 +73,15 @@ HTML-formatted directory listing showing:
 
 **Sample Output:**
 ```
-total 16384
--rw-r--r-- 1 user group 8297856 Feb 20 15:30 images-1708432200456-abc123.zip
--rw-r--r-- 1 user group 9215488 Feb 20 15:45 images-1708433100789-def456.zip
+ZIP Files:
+
+images-1708432200456-abc123.zip
+  Created: 2/20/2024, 3:30:00 PM
+  Size: 8103.32 KB
+
+images-1708433100789-def456.zip
+  Created: 2/20/2024, 3:45:00 PM
+  Size: 9001.45 KB
 ```
 
 This provides:

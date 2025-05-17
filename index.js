@@ -102,22 +102,29 @@ function getExtension(url) {
 app.get('/ls', (req, res) => {
   const dirPath = path.join(__dirname, 'public', 'zips');
   
-  // Create directory if it doesn't exist
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
 
-  fs.readdir(dirPath, (err, files) => {
-    if (err) {
-      return res.status(500).send(`Error: ${err.message}`);
-    }
-    
-    const fileList = files.length > 0 
-      ? files.map(file => `- ${file}`).join('\n') 
+  try {
+    const files = fs.readdirSync(dirPath);
+    const fileDetails = files.map(file => {
+      const stats = fs.statSync(path.join(dirPath, file));
+      return {
+        name: file,
+        size: `${(stats.size / 1024).toFixed(2)} KB`,
+        created: stats.birthtime.toLocaleString()
+      };
+    });
+
+    const fileList = fileDetails.length > 0 
+      ? fileDetails.map(f => `${f.name}\n  Created: ${f.created}\n  Size: ${f.size}`).join('\n\n')
       : 'No ZIP files found';
-      
-    res.send(`<pre>ZIP Files:\n${fileList}</pre>`);
-  });
+
+    res.send(`<pre>ZIP Files:\n\n${fileList}</pre>`);
+  } catch (err) {
+    res.status(500).send(`<pre>Error: ${err.message}</pre>`);
+  }
 });
 
 app.listen(port, () => {
